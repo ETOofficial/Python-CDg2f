@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import re # 用于正则表达式分割字符串
 
-from scipy.ndimage import label
+
 
 from configs import BOOK_PATH
 

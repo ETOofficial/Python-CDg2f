@@ -60,7 +60,7 @@ def gd_map(addr):
     print(f"{addr} 的高德标准经纬度为: ({lon}, {lat})")
     return lon, lat
 
-def draw_map():
+async def draw_map():
     f = csv_editor.read_csv("../docs/address.csv")[1][:20]
 
     for address in f:

@@ -26,3 +26,4 @@ def main_graphnode_generator():
 
 if __name__ == '__main__':
     main_graphnode_generator()
+    # main_relationship_analyze()

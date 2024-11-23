@@ -5,7 +5,7 @@ from tempfile import NamedTemporaryFile # 临时文件模块
 
 import plotly.graph_objects as go
 
-from modules import wordcloud_generator, appears, map_mark
+from modules import wordcloud_generator, appears, map_mark, graphnode_generator
 
 def open_map():
     with open("../outputs/map_marked.html", "r", encoding="utf-8") as f:
@@ -53,6 +53,10 @@ def update_wordcloud():
 async def draw_map():
     ui.notify('正在重新生成,请耐心等待...')
     await map_mark.draw_map()
+    ui.notify('已重新生成！')
+
+def network_generator():
+    graphnode_generator.network_generator()
     ui.notify('已重新生成！')
 
 with ui.tabs().classes('w-full') as tabs:
@@ -113,7 +117,9 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
             ui.code(code).classes('w-full h-full')
     with ui.tab_panel(network):
         # 人物关系网络图
-        ui.button("查看关系网", on_click=open_network)
+        with ui.row():
+            ui.button("查看关系网", on_click=open_network)
+            ui.button("重新生成", on_click=network_generator)
         with open("modules/graphnode_generator.py", "r", encoding="utf-8") as f:
             code = f.read()
             ui.code(code).classes('w-full h-full')

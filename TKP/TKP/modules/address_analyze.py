@@ -1,3 +1,5 @@
+# 地址提取
+
 from jieba import posseg
 from configs import OUTPUT_MENU, BOOK_PATH
 from time import time

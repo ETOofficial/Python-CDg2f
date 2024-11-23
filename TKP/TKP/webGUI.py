@@ -36,9 +36,24 @@ def open_network():
         # 使用webbrowser打开临时HTML文件
         webbrowser.open(f'file://{tmp_file_name}')
 
+
+wordcloud_history = {"../docs/example.png":"example.png"}
 def update_wordcloud():
-    img.source = wordcloud_generator.name_wordcloud()["full_output_path"]
+    # 获取词云图
+    file_url = wordcloud_generator.name_wordcloud()["full_output_path"]
+    # 在历史记录中添加新的词云图
+    wordcloud_history.update({file_url:file_url.split("/")[-1]})
+    # 更新选项
+    history.options = wordcloud_history
+    history.value = file_url
+    history.update()
+    # 更新词云图
     img.update()
+
+async def draw_map():
+    ui.notify('正在重新生成,请耐心等待...')
+    await map_mark.draw_map()
+    ui.notify('已重新生成！')
 
 with ui.tabs().classes('w-full') as tabs:
     wordcloud = ui.tab('词云图')
@@ -49,16 +64,18 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
     with ui.tab_panel(wordcloud):
         with ui.splitter().classes("w-full h-full") as splitter:
             with splitter.before:
+                history = ui.select(wordcloud_history, label="历史记录", value="../docs/example.png")
                 # 词云图
                 with ui.card().classes('w-full h-full'):
-                        ui.button("生成新的词云图", on_click=update_wordcloud)
-                        img = ui.image("../docs/example.png").style("width: 100%; height: 100%;")
+                    ui.button("生成新的词云图", on_click=update_wordcloud)
+                    img = ui.image().classes("w-full h-full").bind_source(history, "value")
+
+
             with splitter.after:
                 ui.label("源代码").style("size: 30px")
                 with open("modules/wordcloud_generator.py", "r", encoding="utf-8") as f:
                     code = f.read()
                     ui.code(code).classes('w-full h-full')
-
     with ui.tab_panel(linechart):
         # 刘、关、张、曹操、孙权、周瑜在各回中出场次数变化的折线图
         with ui.card().classes('w-full h-full'):
@@ -85,14 +102,15 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
             ui.code(code).classes('w-full h-full')
     with ui.tab_panel(place):
         # 地理位置
-        ui.button("查看位置", on_click=open_map)
+        with ui.row():
+            ui.button("查看位置", on_click=open_map)
+            ui.button("重新生成", on_click=draw_map)
         with open("modules/address_analyze.py", "r", encoding="utf-8") as f:
             code = f.read()
             ui.code(code).classes('w-full h-full')
         with open("modules/map_mark.py", "r", encoding="utf-8") as f:
             code = f.read()
             ui.code(code).classes('w-full h-full')
-
     with ui.tab_panel(network):
         # 人物关系网络图
         ui.button("查看关系网", on_click=open_network)

@@ -1,16 +1,40 @@
 from nicegui import ui
 import webbrowser
 import os
+from tempfile import NamedTemporaryFile # 临时文件模块
 
 import plotly.graph_objects as go
 
 from modules import wordcloud_generator, appears, map_mark
 
 def open_map():
-    webbrowser.open(r"C:\Users\dynas\Documents\Code\Python\Python-CDg2f\TKP\outputs\map_marked.html") # 这里改成自己的路径
+    with open("../outputs/map_marked.html", "r", encoding="utf-8") as f:
+        # 创建一个临时的HTML文件
+        with NamedTemporaryFile(delete=False, suffix='.html', mode='w', encoding='utf-8') as tmp_file:
+            # 将HTML文本写入临时文件
+            tmp_file.write(f.read())
+            # 获取临时文件的名称
+            tmp_file_name = tmp_file.name
+
+        # 使用webbrowser打开临时HTML文件
+        webbrowser.open(f'file://{tmp_file_name}')
+
+        # 清理：删除临时文件
+        # 注意：在打开浏览器后删除文件可能导致一些浏览器无法打开文件
+        # 你可能需要在关闭浏览器后再删除文件，或者不删除文件
+        # os.unlink(tmp_file_name)
 
 def open_network():
-    webbrowser.open(r"C:\Users\dynas\Documents\Code\Python\Python-CDg2f\TKP\outputs\graph_with_options.html") # 这里改成自己的路径
+    with open("../outputs/graph_with_options.html", "r", encoding="utf-8") as f:
+        # 创建一个临时的HTML文件
+        with NamedTemporaryFile(delete=False, suffix='.html', mode='w', encoding='utf-8') as tmp_file:
+            # 将HTML文本写入临时文件
+            tmp_file.write(f.read())
+            # 获取临时文件的名称
+            tmp_file_name = tmp_file.name
+
+        # 使用webbrowser打开临时HTML文件
+        webbrowser.open(f'file://{tmp_file_name}')
 
 def update_wordcloud():
     img.source = wordcloud_generator.name_wordcloud()["full_output_path"]

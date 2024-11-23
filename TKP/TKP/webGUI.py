@@ -63,7 +63,8 @@ with ui.tabs().classes('w-full') as tabs:
     wordcloud = ui.tab('词云图')
     linechart = ui.tab('折线图')
     place = ui.tab("地图")
-    network = ui.tab("网络图")
+    network = ui.tab("关系网")
+    web_code = ui.tab("网页源代码")
 with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
     with ui.tab_panel(wordcloud):
         with ui.splitter().classes("w-full h-full") as splitter:
@@ -121,6 +122,10 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
             ui.button("查看关系网", on_click=open_network)
             ui.button("重新生成", on_click=network_generator)
         with open("modules/graphnode_generator.py", "r", encoding="utf-8") as f:
+            code = f.read()
+            ui.code(code).classes('w-full h-full')
+    with ui.tab_panel(web_code):
+        with open("webGUI.py", "r", encoding="utf-8") as f:
             code = f.read()
             ui.code(code).classes('w-full h-full')
 

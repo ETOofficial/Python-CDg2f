@@ -1,5 +1,5 @@
-from utils import csv_editor
-from configs import NAMES_PATH, BOOK_PATH, OUTPUT_MENU
+from .utils import csv_editor
+from .configs import NAMES_PATH, BOOK_PATH, OUTPUT_MENU
 
 def relationship_statistics(names:list, file_path):
     with open(file_path, 'r', encoding='utf-8') as f:

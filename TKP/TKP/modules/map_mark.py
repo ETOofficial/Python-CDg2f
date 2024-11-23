@@ -4,8 +4,8 @@ import folium
 import requests
 # import math
 
-from configs import OUTPUT_MENU, GD_MAP_API_KEY
-from utils import csv_editor
+from .configs import OUTPUT_MENU, GD_MAP_API_KEY
+from .utils import csv_editor
 
 gd_map_called = 0
 
@@ -59,7 +59,7 @@ def gd_map(addr):
     return lon, lat
 
 def draw_map():
-    f = csv_editor.read_csv("../../docs/address.csv")[1][:20]
+    f = csv_editor.read_csv("../docs/address.csv")[1][:20]
 
     for address in f:
         if address["lon"] == "unknown" or address["lat"] == "unknown":
@@ -95,6 +95,7 @@ def draw_map():
 
     # 保存地图到HTML文件
     m.save(OUTPUT_MENU + 'map_marked.html')
+    return OUTPUT_MENU +'map_marked.html'
 
 if __name__ == '__main__':
     # addr = '江东'

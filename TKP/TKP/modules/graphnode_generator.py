@@ -1,13 +1,15 @@
+# 人物关系网络
+
 from pyecharts import options as opts
 from pyecharts.charts import Graph
-from utils import csv_editor
-from configs import OUTPUT_MENU
+from .utils import csv_editor
+from .configs import OUTPUT_MENU
 
 def network_generator():
     nodes = []
     links = []
 
-    relations = csv_editor.read_csv("../../docs/relationship.csv")[1]
+    relations = csv_editor.read_csv("../docs/relationship.csv")[1]
     names = []
     for relationship in relations:
         names += (relationship["relationship"].split(" "))

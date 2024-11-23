@@ -1,3 +1,5 @@
+# 词频统计
+
 import jieba
 
 def words_frequency_statistics(file_path, text):

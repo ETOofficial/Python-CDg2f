@@ -1,12 +1,14 @@
+# 词云图生成
+
 import jieba
 import wordcloud
 import numpy
 import time
 
 from PIL import Image
-from configs import OUTPUT_MENU, STOPWORDS
+from .configs import OUTPUT_MENU, STOPWORDS
 
-from utils import csv_editor
+from .utils import csv_editor
 
 
 def wordcloud_generator(output_path,
@@ -17,7 +19,7 @@ def wordcloud_generator(output_path,
                         background_color="white",
                         max_words=100,
                         stopwords=None,
-                        font_path="../../fonts/PingFangLaiJiangHuLangTi.ttf",
+                        font_path="../fonts/PingFangLaiJiangHuLangTi.ttf",
                         mask=None,
                         relative_scaling=0.5):
 
@@ -39,9 +41,9 @@ def wordcloud_generator(output_path,
 
 def default_wordcloud():
     full_output_path = OUTPUT_MENU + time.strftime('词云图%Y年%m月%d日%H时%M分%S秒.png', time.localtime())
-    mask = numpy.array(Image.open("../../docs/example.png"))
+    mask = numpy.array(Image.open("../docs/example.png"))
 
-    wordcloud_generator(file_path="../../docs/names.csv",
+    wordcloud_generator(file_path="../docs/names.csv",
                         output_path=full_output_path,
                         width=1000,
                         height=800,
@@ -49,10 +51,11 @@ def default_wordcloud():
                         mask=mask)
 
 def name_wordcloud():
-    full_output_path = OUTPUT_MENU + time.strftime('词云图%Y年%m月%d日%H时%M分%S秒.png', time.localtime())
-    mask = numpy.array(Image.open("../../docs/example.png"))
+    file_name = time.strftime('词云图%Y年%m月%d日%H时%M分%S秒.png', time.localtime())
+    full_output_path = OUTPUT_MENU + file_name
+    mask = numpy.array(Image.open("../docs/example.png"))
 
-    f = csv_editor.read_csv("../../docs/names.csv")[1]
+    f = csv_editor.read_csv("../docs/names.csv")[1]
     text = " ".join([line["name"] for line in f][:20]) # 前二十个名字
 
     wordcloud_generator(text=text,
@@ -61,6 +64,10 @@ def name_wordcloud():
                         height=800,
                         mask=mask,
                         relative_scaling=0)
+    return {"file_name": file_name, "full_output_path": full_output_path}
 
 if __name__ == '__main__':
+    # import sys
+    # sys.path.append(".")
+
     name_wordcloud()

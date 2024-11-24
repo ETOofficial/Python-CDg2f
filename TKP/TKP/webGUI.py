@@ -41,11 +41,18 @@ def open_network():
         webbrowser.open(f'file://{tmp_file_name}')
 
 wordcloud_history = {"../docs/mask/leaf.png":"leaf.png"}
-mask = {"../docs/mask/leaf.png":"leaf.png"}
-
+mask = {}
+# 遍历文件夹
+for root, dirs, files in os.walk("../docs/mask"):
+    # root：当前遍历的文件夹的路径。
+    # dirs：当前文件夹下所有子文件夹的名称列表。
+    # files：当前文件夹下所有文件的名称列表。
+    for file in files:
+        # 构建文件路径
+        mask.update({root+"/"+file:file})
 def update_wordcloud():
     # 获取词云图
-    file_url = wordcloud_generator.name_wordcloud(mask=mask_select.value())["full_output_path"]
+    file_url = wordcloud_generator.name_wordcloud(mask=mask_select.value)["full_output_path"]
     # 在历史记录中添加新的词云图
     wordcloud_history.update({file_url:file_url.split("/")[-1]})
     # 更新选项
@@ -71,13 +78,17 @@ with ui.tabs().classes('w-full') as tabs:
     network = ui.tab("关系网")
     web_code = ui.tab("网页源代码")
 with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
+    # 词云图
     with ui.tab_panel(wordcloud):
         with ui.splitter().classes("w-full h-full") as splitter:
             with splitter.before:
-                history_select = ui.select(wordcloud_history, label="历史记录", value="../docs/mask/leaf.png")
-                mask_select = ui.select(mask ,label="遮罩", value="../docs/mask/leaf.png")
-                # 词云图
-                ui.button("生成新的词云图", on_click=update_wordcloud)
+                with ui.row():
+                    ui.button("生成新的词云图", on_click=update_wordcloud)
+                    # 历史记录
+                    history_select = ui.select(wordcloud_history, label="历史记录", value="../docs/mask/leaf.png")
+                    # 遮罩
+                    mask_select = ui.select(mask ,label="遮罩", value="../docs/mask/leaf.png")
+                    ui.image().bind_source_from(mask_select, "value").style("width: 100px; height: 100px;")
                 img = ui.image().classes("w-full h-full").bind_source(history_select, "value")
             with splitter.after:
                 ui.label("源代码").style("font-size: 50px;")

@@ -1,3 +1,7 @@
+"""
+特别鸣谢：https://github.com/syejing/nicegui-reference-cn
+"""
+
 from nicegui import ui
 import webbrowser
 import os
@@ -36,16 +40,18 @@ def open_network():
         # 使用webbrowser打开临时HTML文件
         webbrowser.open(f'file://{tmp_file_name}')
 
-wordcloud_history = {"../docs/example.png":"example.png"}
+wordcloud_history = {"../docs/mask/leaf.png":"leaf.png"}
+mask = {"../docs/mask/leaf.png":"leaf.png"}
+
 def update_wordcloud():
     # 获取词云图
-    file_url = wordcloud_generator.name_wordcloud()["full_output_path"]
+    file_url = wordcloud_generator.name_wordcloud(mask=mask_select.value())["full_output_path"]
     # 在历史记录中添加新的词云图
     wordcloud_history.update({file_url:file_url.split("/")[-1]})
     # 更新选项
-    history.options = wordcloud_history
-    history.value = file_url
-    history.update()
+    history_select.options = wordcloud_history
+    history_select.value = file_url
+    history_select.update()
     # 更新词云图
     img.update()
 
@@ -68,11 +74,11 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
     with ui.tab_panel(wordcloud):
         with ui.splitter().classes("w-full h-full") as splitter:
             with splitter.before:
-                history = ui.select(wordcloud_history, label="历史记录", value="../docs/example.png")
+                history_select = ui.select(wordcloud_history, label="历史记录", value="../docs/mask/leaf.png")
+                mask_select = ui.select(mask ,label="遮罩", value="../docs/mask/leaf.png")
                 # 词云图
-                with ui.card().classes('w-full h-full'):
-                    ui.button("生成新的词云图", on_click=update_wordcloud)
-                    img = ui.image().classes("w-full h-full").bind_source(history, "value")
+                ui.button("生成新的词云图", on_click=update_wordcloud)
+                img = ui.image().classes("w-full h-full").bind_source(history_select, "value")
             with splitter.after:
                 ui.label("源代码").style("font-size: 50px;")
                 with open("modules/wordcloud_generator.py", "r", encoding="utf-8") as f:

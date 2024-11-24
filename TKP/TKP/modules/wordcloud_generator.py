@@ -10,6 +10,8 @@ from .configs import OUTPUT_MENU, STOPWORDS
 
 from .utils import csv_editor
 
+DEFAULT_FONT = "../fonts/PingFangLaiJiangHuLangTi.ttf"
+DEFAULT_MASK = "../docs/mask/leaf.png"
 
 def wordcloud_generator(output_path,
                         width,
@@ -19,7 +21,7 @@ def wordcloud_generator(output_path,
                         background_color="white",
                         max_words=100,
                         stopwords=None,
-                        font_path="../fonts/PingFangLaiJiangHuLangTi.ttf",
+                        font_path=DEFAULT_FONT,
                         mask=None,
                         relative_scaling=0.5):
 
@@ -39,31 +41,56 @@ def wordcloud_generator(output_path,
     wc.generate(text) # 加载词云文本
     wc.to_file(output_path) # 保存词云文件
 
-def default_wordcloud():
-    full_output_path = OUTPUT_MENU + time.strftime('词云图%Y年%m月%d日%H时%M分%S秒.png', time.localtime())
-    mask = numpy.array(Image.open("../docs/example.png"))
+def default_wordcloud(mask=None, font_path=None):
+    if mask is None:
+        mask = DEFAULT_MASK
+
+    if font_path is None:
+        font_path = DEFAULT_FONT
+
+    file_name = time.strftime('词云图%Y年%m月%d日%H时%M分%S秒.png', time.localtime())
+    full_output_path = OUTPUT_MENU + file_name
+    mask = numpy.array(Image.open(mask))
 
     wordcloud_generator(file_path="../docs/names.csv",
                         output_path=full_output_path,
                         width=1000,
                         height=800,
                         stopwords=STOPWORDS,
-                        mask=mask)
+                        mask=mask,
+                        font_path=font_path,)
+    return {"file_name": file_name, "full_output_path": full_output_path}
 
-def name_wordcloud():
+def name_wordcloud(mask=None, font_path=None, num=20):
+    if mask is None:
+        mask = DEFAULT_MASK
+
+    if font_path is None:
+        font_path = DEFAULT_FONT
+
     file_name = time.strftime('词云图%Y年%m月%d日%H时%M分%S秒.png', time.localtime())
     full_output_path = OUTPUT_MENU + file_name
-    mask = numpy.array(Image.open("../docs/example.png"))
+
+    mask = numpy.array(Image.open(mask))
 
     f = csv_editor.read_csv("../docs/names.csv")[1]
-    text = " ".join([line["name"] for line in f][:20]) # 前二十个名字
+    if num <= 0:
+        text = " ".join([line["name"] for line in f])  # 所有名字
+    else:
+        try:
+            text = " ".join([line["name"] for line in f][:num]) # 前 num 个名字
+        except IndexError:
+            print("数量超出索引范围")
+            text = " ".join([line["name"] for line in f][:20])
+
 
     wordcloud_generator(text=text,
                         output_path=full_output_path,
                         width=1000,
                         height=800,
                         mask=mask,
-                        relative_scaling=0)
+                        relative_scaling=0,
+                        font_path=font_path)
     return {"file_name": file_name, "full_output_path": full_output_path}
 
 if __name__ == '__main__':

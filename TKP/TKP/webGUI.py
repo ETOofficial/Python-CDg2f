@@ -41,24 +41,28 @@ def open_network():
         # 使用webbrowser打开临时HTML文件
         webbrowser.open(f'file://{tmp_file_name}')
 
-wordcloud_history = {"../docs/mask/leaf.png":"leaf.png"}
-mask = {}
+wordcloud_history = {"../docs/masks/leaf.png":"leaf.png"}
+masks = {}
 # 遍历文件夹
-for root, dirs, files in os.walk("../docs/mask"):
+for root, dirs, files in os.walk("../docs/masks"):
     # root：当前遍历的文件夹的路径。
     # dirs：当前文件夹下所有子文件夹的名称列表。
     # files：当前文件夹下所有文件的名称列表。
     for file in files:
         # 构建文件路径
-        mask.update({root+"/"+file:file})
+        masks.update({root + "/" + file:file})
+fonts = {}
+for root, dirs, files in os.walk("../fonts"):
+    for file in files:
+        fonts.update({root + "/" + file:file})
 def update_wordcloud():
     # 获取词云图
     if mask_switch.value:
         # 有遮罩
-        file_url = wordcloud_generator.name_wordcloud(mask=mask_select.value, num=int(num_input.value))["full_output_path"]
+        file_url = wordcloud_generator.name_wordcloud(mask=mask_select.value, num=int(num_input.value), font_path=font_select.value)["full_output_path"]
     else:
         # 没有遮罩
-        file_url = wordcloud_generator.name_wordcloud(num=int(num_input.value))["full_output_path"]
+        file_url = wordcloud_generator.name_wordcloud(num=int(num_input.value), font_path=font_select.value)["full_output_path"]
     # 在历史记录中添加新的词云图
     wordcloud_history.update({file_url:file_url.split("/")[-1]})
     # 更新选项
@@ -87,6 +91,7 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
     # 词云图
     with ui.tab_panel(wordcloud):
         with ui.splitter().classes("w-full h-full") as splitter:
+            # 左
             with splitter.before:
                 with ui.expansion('生成设置', icon='settings').classes('w-full'):
                     """
@@ -106,17 +111,24 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
                         with ui.row():
                             mask_switch = ui.switch('启用遮罩', value=True)
                         with ui.row():
-                            mask_select = ui.select(mask ,label="遮罩", value="../docs/mask/leaf.png")
+                            mask_select = ui.select(masks, label="遮罩", value="../docs/masks/leaf.png")
                             ui.image().bind_source_from(mask_select, "value").style("width: 64px; height: 64px;")
                     # 数量
                     with ui.expansion('数量设置', value=True).classes('w-full'):
                         with ui.row():
                             num_input = ui.number(label='人物数量（0为所有人）', value=20, validation={"值不能小于0":lambda n: n >= 0})
                             ui.button("重置", on_click=lambda: num_input.set_value(20)).style("margin-top: 16px;")
+                    # 字体
+                    with ui.expansion('字体设置', value=True).classes('w-full'):
+                        with ui.row():
+                            font_select = ui.select(fonts, label="字体", value="../fonts/PingFangLaiJiangHuLangTi.ttf")
+                            # ui.label("字体预览").props(f"font-family: ’../fonts/PingFangLaiJiangHuLangTi.ttf‘")
+
                 with ui.row():
                     ui.button("生成新的词云图", on_click=update_wordcloud).style("margin-top: 16px;")
-                    history_select = ui.select(wordcloud_history, label="历史记录", value="../docs/mask/leaf.png")
+                    history_select = ui.select(wordcloud_history, label="历史记录", value="../docs/masks/leaf.png")
                 img = ui.image().classes("w-full h-full").bind_source(history_select, "value")
+
                 with ui.expansion("数据来源").classes('w-full'):
                     _, rows = csv_editor.read_csv("../docs/names.csv")
                     columns = [
@@ -124,6 +136,7 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
                         {'name': 'frequency', 'label': '频率', 'required': True, 'field': 'frequency', 'type': 'number', 'align': 'right', "sortable":True},
                     ]
                     ui.table(columns=columns, rows=rows, pagination=10, title="表格").classes("w-full")
+            # 右
             with splitter.after:
                 ui.label("源代码").style("font-size: 50px;")
                 with open("modules/wordcloud_generator.py", "r", encoding="utf-8") as f:

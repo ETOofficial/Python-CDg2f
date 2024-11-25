@@ -11,7 +11,7 @@ from .configs import OUTPUT_MENU, STOPWORDS
 from .utils import csv_editor
 
 DEFAULT_FONT = "../fonts/PingFangLaiJiangHuLangTi.ttf"
-DEFAULT_MASK = "../docs/mask/leaf.png"
+DEFAULT_MASK = None
 
 def wordcloud_generator(output_path,
                         width,
@@ -71,7 +71,8 @@ def name_wordcloud(mask=None, font_path=None, num=20):
     file_name = time.strftime('词云图%Y年%m月%d日%H时%M分%S秒.png', time.localtime())
     full_output_path = OUTPUT_MENU + file_name
 
-    mask = numpy.array(Image.open(mask))
+    if mask is not None:
+        mask = numpy.array(Image.open(mask))
 
     f = csv_editor.read_csv("../docs/names.csv")[1]
     if num <= 0:

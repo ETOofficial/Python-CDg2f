@@ -52,7 +52,12 @@ for root, dirs, files in os.walk("../docs/mask"):
         mask.update({root+"/"+file:file})
 def update_wordcloud():
     # 获取词云图
-    file_url = wordcloud_generator.name_wordcloud(mask=mask_select.value, num=int(num_input.value))["full_output_path"]
+    if mask_switch.value:
+        # 有遮罩
+        file_url = wordcloud_generator.name_wordcloud(mask=mask_select.value, num=int(num_input.value))["full_output_path"]
+    else:
+        # 没有遮罩
+        file_url = wordcloud_generator.name_wordcloud(num=int(num_input.value))["full_output_path"]
     # 在历史记录中添加新的词云图
     wordcloud_history.update({file_url:file_url.split("/")[-1]})
     # 更新选项
@@ -97,6 +102,8 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
                     """
                     # 遮罩
                     with ui.expansion('遮罩设置', value=True).classes('w-full'):
+                        with ui.row():
+                            mask_switch = ui.switch('启用遮罩', value=True)
                         with ui.row():
                             mask_select = ui.select(mask ,label="遮罩", value="../docs/mask/leaf.png")
                             ui.image().bind_source_from(mask_select, "value").style("width: 64px; height: 64px;")

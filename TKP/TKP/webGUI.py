@@ -52,7 +52,7 @@ for root, dirs, files in os.walk("../docs/mask"):
         mask.update({root+"/"+file:file})
 def update_wordcloud():
     # 获取词云图
-    file_url = wordcloud_generator.name_wordcloud(mask=mask_select.value)["full_output_path"]
+    file_url = wordcloud_generator.name_wordcloud(mask=mask_select.value, num=int(num_input.value))["full_output_path"]
     # 在历史记录中添加新的词云图
     wordcloud_history.update({file_url:file_url.split("/")[-1]})
     # 更新选项
@@ -82,13 +82,32 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
     with ui.tab_panel(wordcloud):
         with ui.splitter().classes("w-full h-full") as splitter:
             with splitter.before:
-                with ui.row():
-                    ui.button("生成新的词云图", on_click=update_wordcloud)
-                    # 历史记录
-                    history_select = ui.select(wordcloud_history, label="历史记录", value="../docs/mask/leaf.png")
+                with ui.expansion('生成设置', icon='settings').classes('w-full'):
+                    """
+                    以下是 Material Symbols and Icons 字体库中的一些示例：
+                    - home
+                    - menu
+                    - keyboard
+                    - search
+                    - settings
+                    - info
+                    - close
+                    - expand_more
+                    - expand_less
+                    """
                     # 遮罩
-                    mask_select = ui.select(mask ,label="遮罩", value="../docs/mask/leaf.png")
-                    ui.image().bind_source_from(mask_select, "value").style("width: 100px; height: 100px;")
+                    with ui.expansion('遮罩设置', value=True).classes('w-full'):
+                        with ui.row():
+                            mask_select = ui.select(mask ,label="遮罩", value="../docs/mask/leaf.png")
+                            ui.image().bind_source_from(mask_select, "value").style("width: 64px; height: 64px;")
+                    # 数量
+                    with ui.expansion('数量设置', value=True).classes('w-full'):
+                        with ui.row():
+                            num_input = ui.number(label='人物数量（0为所有人）', value=20, validation={"值不能小于0":lambda n: n >= 0})
+                            ui.button("重置", on_click=lambda: num_input.set_value(20)).style("margin-top: 16px;")
+                with ui.row():
+                    ui.button("生成新的词云图", on_click=update_wordcloud).style("margin-top: 16px;")
+                    history_select = ui.select(wordcloud_history, label="历史记录", value="../docs/mask/leaf.png")
                 img = ui.image().classes("w-full h-full").bind_source(history_select, "value")
             with splitter.after:
                 ui.label("源代码").style("font-size: 50px;")

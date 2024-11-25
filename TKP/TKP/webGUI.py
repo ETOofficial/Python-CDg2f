@@ -7,9 +7,10 @@ import webbrowser
 import os
 from tempfile import NamedTemporaryFile # 临时文件模块
 
-import plotly.graph_objects as go
+import plotly.graph_objects as go # 绘图模块
 
 from modules import wordcloud_generator, appears, map_mark, graphnode_generator
+from modules.utils import csv_editor
 
 def open_map():
     with open("../outputs/map_marked.html", "r", encoding="utf-8") as f:
@@ -116,6 +117,13 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
                     ui.button("生成新的词云图", on_click=update_wordcloud).style("margin-top: 16px;")
                     history_select = ui.select(wordcloud_history, label="历史记录", value="../docs/mask/leaf.png")
                 img = ui.image().classes("w-full h-full").bind_source(history_select, "value")
+                with ui.expansion("数据来源").classes('w-full'):
+                    _, rows = csv_editor.read_csv("../docs/names.csv")
+                    columns = [
+                        {'name': 'name', 'label': '名字', 'required': True, 'field': 'name', 'type': 'text', 'align': 'left', "sortable":True},
+                        {'name': 'frequency', 'label': '频率', 'required': True, 'field': 'frequency', 'type': 'number', 'align': 'right', "sortable":True},
+                    ]
+                    ui.table(columns=columns, rows=rows, pagination=10, title="表格").classes("w-full")
             with splitter.after:
                 ui.label("源代码").style("font-size: 50px;")
                 with open("modules/wordcloud_generator.py", "r", encoding="utf-8") as f:

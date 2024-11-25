@@ -136,6 +136,15 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
                         {'name': 'frequency', 'label': '频率', 'required': True, 'field': 'frequency', 'type': 'number', 'align': 'right', "sortable":True},
                     ]
                     ui.table(columns=columns, rows=rows, pagination=10, title="表格").classes("w-full")
+
+                    ui.echart({
+                        'xAxis': {'type': 'value'},
+                        'yAxis': {'type': 'category', 'data': [data["name"] for data in rows][:100], 'inverse': True},
+                        'legend': {'textStyle': {'color': 'gray'}},
+                        'series': [
+                            {'type': 'bar', 'name': '出现频率', 'data': [data["frequency"] for data in rows][:100]},
+                        ],
+                    }).classes("w-full").style("height: 500px")
             # 右
             with splitter.after:
                 ui.label("源代码").style("font-size: 50px;")

@@ -61,7 +61,7 @@ def default_wordcloud(mask=None, font_path=None):
                         font_path=font_path,)
     return {"file_name": file_name, "full_output_path": full_output_path}
 
-def name_wordcloud(mask=None, font_path=None, num=20):
+def name_wordcloud(mask=None, font_path=None, num=20, background_color="white"):
     if mask is None:
         mask = DEFAULT_MASK
 
@@ -91,7 +91,8 @@ def name_wordcloud(mask=None, font_path=None, num=20):
                         height=800,
                         mask=mask,
                         relative_scaling=0,
-                        font_path=font_path)
+                        font_path=font_path,
+                        background_color=background_color)
     return {"file_name": file_name, "full_output_path": full_output_path}
 
 if __name__ == '__main__':

@@ -1,8 +1,8 @@
 
 
-def main_wordcloud_generator():
+def main_wordcloud_generator(mask=None, font_path=None, num=20, background_color="white"):
     from modules.wordcloud_generator import name_wordcloud
-    name_wordcloud()
+    name_wordcloud(mask, font_path, num, background_color)
 
 def main_appears():
     from modules.appears import appears, draw
@@ -25,5 +25,6 @@ def main_graphnode_generator():
     network_generator()
 
 if __name__ == '__main__':
-    main_graphnode_generator()
+    # main_graphnode_generator()
     # main_relationship_analyze()
+    main_wordcloud_generator(background_color='#3d3223')

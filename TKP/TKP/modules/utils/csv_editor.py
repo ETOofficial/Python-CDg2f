@@ -1,17 +1,20 @@
 import csv
 def read_csv(path):
     """
-    读取csv文件，返回一个列表，列表的第一个元素是列名，第二个元素是数据
+    读取csv文件
 
     Args:
         path: csv文件路径
+
+    Returns:
+        列名，数据
     """
     with open(path, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         rows = []
         for row in reader:
             rows.append(row)  # 每一行是一个字典，键是列名
-        return [reader.fieldnames, rows]
+        return reader.fieldnames, rows
 def write_csv(path, headers, rows):
     """
     Args:
@@ -23,3 +26,9 @@ def write_csv(path, headers, rows):
         writer = csv.DictWriter(f, fieldnames=headers)
         writer.writeheader()  # 写入列名
         writer.writerows(rows)  # 写入数据行
+
+if __name__ == '__main__':
+    headers, rows = read_csv('../../../docs/names.csv')
+    print(headers)
+    print(rows)
+    # write_csv('../outputs/relationship.csv', headers, rows)

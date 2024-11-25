@@ -1,11 +1,42 @@
+"""
+特别鸣谢：https://github.com/syejing/nicegui-reference-cn
+"""
+
 from nicegui import ui
 import webbrowser
 import os
 from tempfile import NamedTemporaryFile # 临时文件模块
 
-import plotly.graph_objects as go
+import plotly.graph_objects as go # 绘图模块
 
 from modules import wordcloud_generator, appears, map_mark, graphnode_generator
+from modules.utils import csv_editor
+
+# style
+HEADER_COLOR = "#6f747c"
+FOOTER_COLOR = "#6f747c"
+CARD_COLOR = "#b3bbc8"
+CARD_COLOR_2 = "#ffffff"
+CARD_IMG_COLOR = "#ffffff"
+
+card_img_color_wordcloud = CARD_IMG_COLOR
+
+def rgb_to_hex(rgb):
+    # 确保RGB值的范围在0-255之间
+    # 判断是否为rgb格式
+    if len(rgb) < len("rgb(0, 0, 0)") or rgb[:3] != "rgb":
+        # 否则不处理
+        return rgb
+    rgb = tuple([int(i) for i in rgb[4:-1].split(", ")])
+    r, g, b = rgb
+    return "#{:02x}{:02x}{:02x}".format(r, g, b)
+
+# 词云图卡片背景色
+wordcloud_background_color_picker = "#ffffff"
+def on_color_picked(e):
+    global wordcloud_background_color_picker
+    button.style(f'background-color:{e.color}!important')
+    wordcloud_background_color_picker = e.color
 
 def open_map():
     with open("../outputs/map_marked.html", "r", encoding="utf-8") as f:
@@ -36,16 +67,47 @@ def open_network():
         # 使用webbrowser打开临时HTML文件
         webbrowser.open(f'file://{tmp_file_name}')
 
-wordcloud_history = {"../docs/example.png":"example.png"}
+wordcloud_history = {"../docs/masks/leaf.png":"leaf.png"}
+masks = {}
+# 遍历文件夹
+for root, dirs, files in os.walk("../docs/masks"):
+    # root：当前遍历的文件夹的路径。
+    # dirs：当前文件夹下所有子文件夹的名称列表。
+    # files：当前文件夹下所有文件的名称列表。
+    for file in files:
+        # 构建文件路径
+        masks.update({root + "/" + file:file})
+fonts = {}
+for root, dirs, files in os.walk("../fonts"):
+    for file in files:
+        fonts.update({root + "/" + file:file})
 def update_wordcloud():
+    global card_img_color_wordcloud
+    print(wordcloud_background_color_picker)
+    card_img_color_wordcloud = wordcloud_background_color_picker
+    wordcloud_img_card.style(f"background-color: {card_img_color_wordcloud}")
     # 获取词云图
-    file_url = wordcloud_generator.name_wordcloud()["full_output_path"]
+    if mask_switch.value:
+        # 有遮罩
+        file_url = wordcloud_generator.name_wordcloud(
+            mask=mask_select.value,
+            num=int(num_input.value),
+            font_path=font_select.value,
+            background_color=wordcloud_background_color_picker
+        )["full_output_path"]
+    else:
+        # 没有遮罩
+        file_url = wordcloud_generator.name_wordcloud(
+            num=int(num_input.value),
+            font_path=font_select.value,
+            background_color=wordcloud_background_color_picker
+        )["full_output_path"]
     # 在历史记录中添加新的词云图
     wordcloud_history.update({file_url:file_url.split("/")[-1]})
     # 更新选项
-    history.options = wordcloud_history
-    history.value = file_url
-    history.update()
+    history_select.options = wordcloud_history
+    history_select.value = file_url
+    history_select.update()
     # 更新词云图
     img.update()
 
@@ -58,28 +120,97 @@ def network_generator():
     graphnode_generator.network_generator()
     ui.notify('已重新生成！')
 
-with ui.tabs().classes('w-full') as tabs:
-    wordcloud = ui.tab('词云图')
-    linechart = ui.tab('折线图')
-    place = ui.tab("地图")
-    network = ui.tab("关系网")
-    web_code = ui.tab("网页源代码")
+with ui.header(elevated=True).style(f'background-color: {HEADER_COLOR}').classes('items-center justify-between'):
+# with ui.left_drawer(elevated=True).style('background-color: #2b2d30').classes('items-center justify-between'):
+    with ui.tabs().classes('w-full') as tabs:
+        wordcloud = ui.tab('词云图')
+        linechart = ui.tab('折线图')
+        place = ui.tab("地图")
+        network = ui.tab("关系网")
+        web_code = ui.tab("网页源代码")
+
+# with ui.right_drawer(fixed=False).style('background-color: #ebf1fa').props('bordered') as right_drawer:
 with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
+    # 词云图
     with ui.tab_panel(wordcloud):
         with ui.splitter().classes("w-full h-full") as splitter:
+            # 左
             with splitter.before:
-                history = ui.select(wordcloud_history, label="历史记录", value="../docs/example.png")
-                # 词云图
-                with ui.card().classes('w-full h-full'):
-                    ui.button("生成新的词云图", on_click=update_wordcloud)
-                    img = ui.image().classes("w-full h-full").bind_source(history, "value")
+                with ui.card().classes("w-full"):
+                    with ui.card().style(f'background-color: {CARD_COLOR}').classes('w-full').style("padding: 0px"):
+                        with ui.expansion('生成设置', icon='settings').classes('w-full'):
+                                """
+                                以下是 Material Symbols and Icons 字体库中的一些示例：
+                                - home
+                                - menu
+                                - keyboard
+                                - search
+                                - settings
+                                - info
+                                - close
+                                - expand_more
+                                - expand_less
+                                """
+                                # 遮罩
+                                with ui.expansion('遮罩设置', value=True).classes('w-full').style(f'background-color: {CARD_COLOR_2}'):
+                                    with ui.row():
+                                        mask_switch = ui.switch('启用遮罩', value=True)
+                                    with ui.row():
+                                        mask_select = ui.select(masks, label="遮罩", value="../docs/masks/leaf.png")
+                                        ui.image().bind_source_from(mask_select, "value").style("width: 64px; height: 64px;")
+                                # 数量
+                                with ui.expansion('数量设置', value=True).classes('w-full').style(f'background-color: {CARD_COLOR_2}'):
+                                    with ui.row():
+                                        num_input = ui.number(label='人物数量（0为所有人）', value=20, validation={"值不能小于0":lambda n: n >= 0})
+                                        ui.button("重置", on_click=lambda: num_input.set_value(20)).style("margin-top: 16px;")
+                                # 字体
+                                with ui.expansion('字体设置', value=True).classes('w-full').style(f'background-color: {CARD_COLOR_2}'):
+                                    with ui.row():
+                                        font_select = ui.select(fonts, label="字体", value="../fonts/PingFangLaiJiangHuLangTi.ttf")
+                                        # ui.label("字体预览").props(f"font-family: ’../fonts/PingFangLaiJiangHuLangTi.ttf‘")
+
+                                # 背景色
+                                with ui.expansion('背景色设置', value=True).classes('w-full').style(f'background-color: {CARD_COLOR_2}'):
+                                    with ui.button(icon='colorize').classes("w-full") as button:
+                                        ui.color_picker(on_pick=on_color_picked)
+
+
+
+                    with ui.card().style(f'background-color: {CARD_COLOR}').classes('w-full'):
+                        with ui.row():
+                            ui.button("生成新的词云图", on_click=update_wordcloud).style("margin-top: 16px;")
+                            history_select = ui.select(wordcloud_history, label="历史记录", value="../docs/masks/leaf.png")
+                        with ui.card().style(f'background-color: {CARD_IMG_COLOR}').classes('w-full') as card:
+                            # 词云图卡片
+                            wordcloud_img_card = card
+                            img = ui.image().classes("w-full h-full").bind_source(history_select, "value")
+
+                    with ui.card().style(f'background-color: {CARD_COLOR}').style('background-color: #e7c593').classes('w-full').style("padding: 0px"):
+                        with ui.expansion("数据来源").classes('w-full'):
+                            _, rows = csv_editor.read_csv("../docs/names.csv")
+                            columns = [
+                                {'name': 'name', 'label': '名字', 'required': True, 'field': 'name', 'type': 'text', 'align': 'left', "sortable":True},
+                                {'name': 'frequency', 'label': '频率', 'required': True, 'field': 'frequency', 'type': 'number', 'align': 'right', "sortable":True},
+                            ]
+                            ui.table(columns=columns, rows=rows, pagination=10).classes("w-full")
+
+                            ui.echart({
+                                'xAxis': {'type': 'value'},
+                                'yAxis': {'type': 'category', 'data': [data["name"] for data in rows][:100], 'inverse': True},
+                                'legend': {'textStyle': {'color': 'gray'}},
+                                'series': [
+                                    {'type': 'bar', 'name': '出现频率', 'data': [data["frequency"] for data in rows][:100]},
+                                ],
+                            }).classes("w-full").style("height: 500px")
+            # 右
             with splitter.after:
-                ui.label("源代码").style("font-size: 50px;")
-                with open("modules/wordcloud_generator.py", "r", encoding="utf-8") as f:
-                    code = f.read()
-                    ui.code(code).classes('w-full h-full')
+                with ui.card().classes("w-full"):
+                    ui.label("源代码").style("font-size: 50px;")
+                    with open("modules/wordcloud_generator.py", "r", encoding="utf-8") as f:
+                        code = f.read()
+                        ui.code(code).classes('w-full h-full')
+    # 刘、关、张、曹操、孙权、周瑜在各回中出场次数变化的折线图
     with ui.tab_panel(linechart):
-        # 刘、关、张、曹操、孙权、周瑜在各回中出场次数变化的折线图
         with ui.card().classes('w-full h-full'):
             data = {
                 "刘":appears.appears("玄德"),
@@ -102,8 +233,8 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
         with open("modules/appears.py", "r", encoding="utf-8") as f:
             code = f.read()
             ui.code(code).classes('w-full h-full')
+    # 地理位置
     with ui.tab_panel(place):
-        # 地理位置
         with ui.row():
             ui.button("查看位置", on_click=open_map)
             ui.button("重新生成", on_click=draw_map)
@@ -115,8 +246,8 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
         with open("modules/map_mark.py", "r", encoding="utf-8") as f:
             code = f.read()
             ui.code(code).classes('w-full h-full')
+    # 人物关系网络图
     with ui.tab_panel(network):
-        # 人物关系网络图
         with ui.row():
             ui.button("查看关系网", on_click=open_network)
             ui.button("重新生成", on_click=network_generator)
@@ -124,10 +255,14 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
         with open("modules/graphnode_generator.py", "r", encoding="utf-8") as f:
             code = f.read()
             ui.code(code).classes('w-full h-full')
+    # 网页源代码
     with ui.tab_panel(web_code):
         with open("webGUI.py", "r", encoding="utf-8") as f:
             code = f.read()
             ui.code(code).classes('w-full h-full')
+
+with ui.footer().style(f'background-color: {FOOTER_COLOR}'):
+    ui.label('FOOTER')
 
 # 启动 UI
 ui.run()

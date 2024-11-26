@@ -120,6 +120,14 @@ def network_generator():
     graphnode_generator.network_generator()
     ui.notify('已重新生成！')
 
+def wordcloud_data_echart_update():
+    print("wordcloud_data_echart_update 检测到更改")
+    wordcloud_data_echart.options['yAxis']['data'] = [data["name"] for data in rows][:wordcloud_data_echart_slider.value]
+    wordcloud_data_echart.options['series'][0]['data'] = [data["frequency"] for data in rows][:wordcloud_data_echart_slider.value]
+    wordcloud_data_echart.update()
+    wordcloud_data_echart_label.text = f"显示数量：{wordcloud_data_echart_slider.value}"
+    wordcloud_data_echart_label.update()
+
 with ui.header(elevated=True).style(f'background-color: {HEADER_COLOR}').classes('items-center justify-between'):
 # with ui.left_drawer(elevated=True).style('background-color: #2b2d30').classes('items-center justify-between'):
     with ui.tabs().classes('w-full') as tabs:
@@ -174,8 +182,6 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
                                     with ui.button(icon='colorize').classes("w-full") as button:
                                         ui.color_picker(on_pick=on_color_picked)
 
-
-
                     with ui.card().style(f'background-color: {CARD_COLOR}').classes('w-full'):
                         with ui.row():
                             ui.button("生成新的词云图", on_click=update_wordcloud).style("margin-top: 16px;")
@@ -194,14 +200,19 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
                             ]
                             ui.table(columns=columns, rows=rows, pagination=10).classes("w-full")
 
-                            ui.echart({
-                                'xAxis': {'type': 'value'},
-                                'yAxis': {'type': 'category', 'data': [data["name"] for data in rows][:100], 'inverse': True},
-                                'legend': {'textStyle': {'color': 'gray'}},
-                                'series': [
-                                    {'type': 'bar', 'name': '出现频率', 'data': [data["frequency"] for data in rows][:100]},
-                                ],
-                            }).classes("w-full").style("height: 500px")
+                            with ui.card().classes('w-full').style("background-color: #ffffff"):
+                                wordcloud_data_echart_label = ui.label("显示数量：100").classes("w-full")
+                                wordcloud_data_echart_slider = ui.slider(min=1, max=len([data["name"] for data in rows]), step=1, value=100,
+                                                                         on_change=wordcloud_data_echart_update,
+                                                                         ).classes("w-full")
+                                wordcloud_data_echart = ui.echart({
+                                    'xAxis': {'type': 'value'},
+                                    'yAxis': {'type': 'category', 'data': [data["name"] for data in rows][:100], 'inverse': True},
+                                    'legend': {'textStyle': {'color': 'gray'}},
+                                    'series': [
+                                        {'type': 'bar', 'name': '出现频率', 'data': [data["frequency"] for data in rows][:100]},
+                                    ],
+                                    }).classes("w-full").style("height: 500px")
             # 右
             with splitter.after:
                 with ui.card().classes("w-full"):
@@ -262,7 +273,7 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
             ui.code(code).classes('w-full h-full')
 
 with ui.footer().style(f'background-color: {FOOTER_COLOR}'):
-    ui.label('FOOTER')
+    ui.label('Python-CDg2f')
 
 # 启动 UI
 ui.run()

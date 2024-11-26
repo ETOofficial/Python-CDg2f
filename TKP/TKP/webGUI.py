@@ -21,6 +21,13 @@ CARD_IMG_COLOR = "#ffffff"
 
 card_img_color_wordcloud = CARD_IMG_COLOR
 
+def log(*values, sep= " ", end= "\n"):
+    """
+    用法参见 print
+    """
+    import datetime
+    print(f"[{datetime.datetime.now()}]", *values, end=end, sep=sep)
+
 def rgb_to_hex(rgb):
     # 确保RGB值的范围在0-255之间
     # 判断是否为rgb格式
@@ -35,6 +42,7 @@ def rgb_to_hex(rgb):
 wordcloud_background_color_picker = "#ffffff"
 def on_color_picked(e):
     global wordcloud_background_color_picker
+    log("检测到颜色变化：", e.color)
     button.style(f'background-color:{e.color}!important')
     wordcloud_background_color_picker = e.color
 
@@ -117,11 +125,12 @@ async def draw_map():
     ui.notify('已重新生成！')
 
 def network_generator():
+    log("network_generator 函数被调用")
     graphnode_generator.network_generator()
     ui.notify('已重新生成！')
 
 def wordcloud_data_echart_update():
-    print("wordcloud_data_echart_update 检测到更改")
+    log("wordcloud_data_echart_slider 检测到更改：", wordcloud_data_echart_slider.value)
     wordcloud_data_echart.options['yAxis']['data'] = [data["name"] for data in rows][:wordcloud_data_echart_slider.value]
     wordcloud_data_echart.options['series'][0]['data'] = [data["frequency"] for data in rows][:wordcloud_data_echart_slider.value]
     wordcloud_data_echart.update()
@@ -145,6 +154,7 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
             # 左
             with splitter.before:
                 with ui.card().classes("w-full"):
+                    # 生成设置
                     with ui.card().style(f'background-color: {CARD_COLOR}').classes('w-full').style("padding: 0px"):
                         with ui.expansion('生成设置', icon='settings').classes('w-full'):
                                 """
@@ -182,6 +192,7 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
                                     with ui.button(icon='colorize').classes("w-full") as button:
                                         ui.color_picker(on_pick=on_color_picked)
 
+                    # 生成词云图
                     with ui.card().style(f'background-color: {CARD_COLOR}').classes('w-full'):
                         with ui.row():
                             ui.button("生成新的词云图", on_click=update_wordcloud).style("margin-top: 16px;")
@@ -191,6 +202,7 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
                             wordcloud_img_card = card
                             img = ui.image().classes("w-full h-full").bind_source(history_select, "value")
 
+                    # 数据来源
                     with ui.card().style(f'background-color: {CARD_COLOR}').style('background-color: #e7c593').classes('w-full').style("padding: 0px"):
                         with ui.expansion("数据来源").classes('w-full'):
                             _, rows = csv_editor.read_csv("../docs/names.csv")

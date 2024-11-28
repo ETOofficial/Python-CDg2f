@@ -1,4 +1,5 @@
-from configs import BOOK_PATH
+from modules.configs import BOOK_PATH
+
 from snownlp import SnowNLP
 from tqdm import tqdm
 import matplotlib.pyplot as plt

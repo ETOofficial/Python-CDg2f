@@ -91,7 +91,6 @@ for root, dirs, files in os.walk("../fonts"):
         fonts.update({root + "/" + file:file})
 def update_wordcloud():
     global card_img_color_wordcloud
-    print(wordcloud_background_color_picker)
     card_img_color_wordcloud = wordcloud_background_color_picker
     wordcloud_img_card.style(f"background-color: {card_img_color_wordcloud}")
     # 获取词云图
@@ -118,6 +117,7 @@ def update_wordcloud():
     history_select.update()
     # 更新词云图
     img.update()
+    log("生成词云图：", file_url)
 
 async def draw_map():
     ui.notify('正在重新生成,请耐心等待...')
@@ -205,15 +205,17 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
                     # 数据来源
                     with ui.card().style(f'background-color: {CARD_COLOR}').style('background-color: #e7c593').classes('w-full').style("padding: 0px"):
                         with ui.expansion("数据来源").classes('w-full'):
+                            # 读取数据
                             _, rows = csv_editor.read_csv("../docs/names.csv")
+                            # 表格
                             columns = [
                                 {'name': 'name', 'label': '名字', 'required': True, 'field': 'name', 'type': 'text', 'align': 'left', "sortable":True},
                                 {'name': 'frequency', 'label': '频率', 'required': True, 'field': 'frequency', 'type': 'number', 'align': 'right', "sortable":True},
                             ]
                             ui.table(columns=columns, rows=rows, pagination=10).classes("w-full")
-
+                            # 条形图
                             with ui.card().classes('w-full').style("background-color: #ffffff"):
-                                wordcloud_data_echart_label = ui.label("显示数量：100").classes("w-full")
+                                wordcloud_data_echart_label = ui.label("显示数量：")
                                 wordcloud_data_echart_slider = ui.slider(min=1, max=len([data["name"] for data in rows]), step=1, value=100,
                                                                          on_change=wordcloud_data_echart_update,
                                                                          ).classes("w-full")

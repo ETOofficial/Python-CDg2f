@@ -6,9 +6,9 @@ import numpy
 import time
 
 from PIL import Image
-from .configs import OUTPUT_MENU, STOPWORDS
+from modules.configs import OUTPUT_MENU, STOPWORDS
 
-from .utils import csv_editor
+from modules.utils import csv_editor
 
 DEFAULT_FONT = "../fonts/PingFangLaiJiangHuLangTi.ttf"
 DEFAULT_MASK = None

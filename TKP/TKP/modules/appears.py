@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import re # 用于正则表达式分割字符串
 
-from .configs import BOOK_PATH
+from modules.configs import BOOK_PATH
 
 # 定义 appears 函数，用于统计指定人物在文本中各章节的出现次数
 def appears(name):

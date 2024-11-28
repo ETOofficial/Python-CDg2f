@@ -1,8 +1,10 @@
 # 地址提取
 
 from jieba import posseg
-from configs import OUTPUT_MENU, BOOK_PATH
 from time import time
+
+
+from modules.configs import OUTPUT_MENU, BOOK_PATH
 
 def address_statistics(file_path, text):
     words = posseg.cut(text.strip())

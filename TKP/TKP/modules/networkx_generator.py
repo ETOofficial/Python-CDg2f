@@ -7,8 +7,8 @@
 import networkx
 from matplotlib import pyplot
 
-from utils import csv_editor
-from configs import OUTPUT_MENU
+from modules.utils import csv_editor
+from modules.configs import OUTPUT_MENU
 
 def network_generator():
     net = networkx.Graph()

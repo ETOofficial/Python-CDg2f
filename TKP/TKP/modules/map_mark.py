@@ -6,8 +6,8 @@ import folium
 import requests
 # import math
 
-from .configs import OUTPUT_MENU, GD_MAP_API_KEY
-from .utils import csv_editor
+from modules.configs import OUTPUT_MENU, GD_MAP_API_KEY
+from modules.utils import csv_editor
 
 gd_map_called = 0
 

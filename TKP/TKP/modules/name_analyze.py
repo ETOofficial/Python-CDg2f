@@ -1,6 +1,9 @@
 from jieba import posseg
-from .configs import OUTPUT_MENU, BOOK_PATH
 from time import time
+
+from modules.configs import OUTPUT_MENU,
+
+
 
 def name_statistics(file_path, text):
     words = posseg.cut(text.strip())

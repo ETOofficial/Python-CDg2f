@@ -347,6 +347,20 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
         with open("modules/graphnode_generator.py", "r", encoding="utf-8") as f:
             code = f.read()
             ui.code(code).classes('w-full h-full')
+        # 数据来源
+        with ui.card().style(f'background-color: {CARD_COLOR}').style('background-color: #e7c593').classes(
+                'w-full').style("padding: 0px"):
+            with ui.expansion("数据来源").classes('w-full'):
+                # 读取数据
+                _, relationship_data_rows = csv_editor.read_csv("../docs/relationship.csv")
+                # 表格
+                relationship_data_columns = [
+                    {'name': 'relationship', 'label': '涉及的人', 'required': True, 'field': 'relationship', 'type': 'text',
+                     'align': 'center', "sortable": False},
+                    {'name': 'frequency', 'label': '频率', 'required': True, 'field': 'frequency', 'type': 'number',
+                     'align': 'right', "sortable": True},
+                ]
+                ui.table(columns=relationship_data_columns, rows=relationship_data_rows, pagination=10).classes("w-full")
     # 网页源代码
     with ui.tab_panel(web_code):
         with open("webGUI.py", "r", encoding="utf-8") as f:

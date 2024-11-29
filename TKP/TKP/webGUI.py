@@ -23,7 +23,7 @@ card_img_color_wordcloud = CARD_IMG_COLOR
 
 def log(*values, sep= " ", end= "\n"):
     """
-    用法参见 print
+    用于控制台日志输出。用法参见 print 函数。
     """
     import datetime
     print(f"[{datetime.datetime.now()}]", *values, end=end, sep=sep)
@@ -131,8 +131,8 @@ def network_generator():
 
 def wordcloud_data_echart_update():
     log("wordcloud_data_echart_slider 检测到更改：", wordcloud_data_echart_slider.value)
-    wordcloud_data_echart.options['yAxis']['data'] = [data["name"] for data in rows][:wordcloud_data_echart_slider.value]
-    wordcloud_data_echart.options['series'][0]['data'] = [data["frequency"] for data in rows][:wordcloud_data_echart_slider.value]
+    wordcloud_data_echart.options['yAxis']['data'] = [data["name"] for data in wordcloud_data_rows][:wordcloud_data_echart_slider.value]
+    wordcloud_data_echart.options['series'][0]['data'] = [data["frequency"] for data in wordcloud_data_rows][:wordcloud_data_echart_slider.value]
     wordcloud_data_echart.update()
     wordcloud_data_echart_label.text = f"显示数量：{wordcloud_data_echart_slider.value}"
     wordcloud_data_echart_label.update()
@@ -216,25 +216,25 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
                     with ui.card().style(f'background-color: {CARD_COLOR}').style('background-color: #e7c593').classes('w-full').style("padding: 0px"):
                         with ui.expansion("数据来源").classes('w-full'):
                             # 读取数据
-                            _, rows = csv_editor.read_csv("../docs/names.csv")
+                            _, wordcloud_data_rows = csv_editor.read_csv("../docs/names.csv")
                             # 表格
-                            columns = [
+                            wordcloud_data_columns = [
                                 {'name': 'name', 'label': '名字', 'required': True, 'field': 'name', 'type': 'text', 'align': 'left', "sortable":True},
                                 {'name': 'frequency', 'label': '频率', 'required': True, 'field': 'frequency', 'type': 'number', 'align': 'right', "sortable":True},
                             ]
-                            ui.table(columns=columns, rows=rows, pagination=10).classes("w-full")
+                            ui.table(columns=wordcloud_data_columns, rows=wordcloud_data_rows, pagination=10).classes("w-full")
                             # 条形图
                             with ui.card().classes('w-full').style("background-color: #ffffff"):
                                 wordcloud_data_echart_label = ui.label("显示数量：")
-                                wordcloud_data_echart_slider = ui.slider(min=1, max=len([data["name"] for data in rows]), step=1, value=100,
+                                wordcloud_data_echart_slider = ui.slider(min=1, max=len([data["name"] for data in wordcloud_data_rows]), step=1, value=100,
                                                                          on_change=wordcloud_data_echart_update,
                                                                          ).classes("w-full")
                                 wordcloud_data_echart = ui.echart({
                                     'xAxis': {'type': 'value'},
-                                    'yAxis': {'type': 'category', 'data': [data["name"] for data in rows][:100], 'inverse': True},
+                                    'yAxis': {'type': 'category', 'data': [data["name"] for data in wordcloud_data_rows][:100], 'inverse': True},
                                     'legend': {'textStyle': {'color': 'gray'}},
                                     'series': [
-                                        {'type': 'bar', 'name': '出现频率', 'data': [data["frequency"] for data in rows][:100]},
+                                        {'type': 'bar', 'name': '出现频率', 'data': [data["frequency"] for data in wordcloud_data_rows][:100]},
                                     ],
                                     }).classes("w-full").style("height: 500px")
             # 右
@@ -300,7 +300,7 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
     # 地理位置
     with ui.tab_panel(place):
         with ui.row():
-            ui.button("查看位置", on_click=open_map)
+            ui.button("查看地图", on_click=open_map)
             ui.button("重新生成", on_click=draw_map)
 
         ui.label("源代码").style("font-size: 50px;")
@@ -310,6 +310,34 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
         with open("modules/map_mark.py", "r", encoding="utf-8") as f:
             code = f.read()
             ui.code(code).classes('w-full h-full')
+
+        # 数据来源
+        with ui.card().style(f'background-color: {CARD_COLOR}').style('background-color: #e7c593').classes(
+                'w-full').style("padding: 0px"):
+            with ui.expansion("数据来源").classes('w-full'):
+                # 读取数据
+                _, address_data_rows = csv_editor.read_csv("../docs/address.csv")
+                # 表格
+                address_data_columns = [
+                    {'name': 'address', 'label': '地址', 'required': True, 'field': 'address', 'type': 'text',
+                     'align': 'center', "sortable": True},
+                    {'name': 'frequency', 'label': '频率', 'required': True, 'field': 'frequency', 'type': 'number',
+                     'align': 'right', "sortable": True},
+                    {'name': 'current_address', 'label': '实际位置', 'required': True, 'field': 'current_address',
+                     'type': 'text',
+                     'align': 'center', "sortable": False},
+                    # {'name': 'lon', 'label': '经度', 'required': True, 'field': 'lon',
+                    #  'type': 'number',
+                    #  'align': 'right', "sortable": True},
+                    # {'name': 'lat', 'label': '纬度', 'required': True, 'field': 'lat',
+                    #  'type': 'number',
+                    #  'align': 'right', "sortable": True},
+                    {'name': 'note', 'label': '备注', 'required': True, 'field': 'note',
+                     'type': 'text',
+                     'align': 'left', "sortable": False},
+                ]
+                ui.table(columns=address_data_columns, rows=address_data_rows, pagination=10).classes("w-full")
+
     # 人物关系网络图
     with ui.tab_panel(network):
         with ui.row():

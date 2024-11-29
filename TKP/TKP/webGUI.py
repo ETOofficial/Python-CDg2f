@@ -137,6 +137,16 @@ def wordcloud_data_echart_update():
     wordcloud_data_echart_label.text = f"显示数量：{wordcloud_data_echart_slider.value}"
     wordcloud_data_echart_label.update()
 
+def appears_data_echart_update():
+    log("appears_data_echart_slider 检测到更改：",appears_data_echart_slider_min.value, appears_data_echart_slider_max.value)
+    appears_data_echart.options['yAxis']['data'] = list(range(appears_data_echart_slider_min.value, appears_data_echart_slider_max.value + 1))
+    appears_data_echart.options['series'] = [
+                            {'type': 'bar', 'name': person_data[0], 'data': person_data[1][appears_data_echart_slider_min.value:appears_data_echart_slider_max.value + 1]} for person_data in appears_data.items()
+                        ]
+    appears_data_echart.update()
+    appears_data_echart_label.text = f"显示区间：{appears_data_echart_slider_min.value}~{appears_data_echart_slider_max.value}"
+    appears_data_echart_label.update()
+
 with ui.header(elevated=True).style(f'background-color: {HEADER_COLOR}').classes('items-center justify-between'):
 # with ui.left_drawer(elevated=True).style('background-color: #2b2d30').classes('items-center justify-between'):
     with ui.tabs().classes('w-full') as tabs:
@@ -236,8 +246,9 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
                         ui.code(code).classes('w-full h-full')
     # 刘、关、张、曹操、孙权、周瑜在各回中出场次数变化的折线图
     with ui.tab_panel(linechart):
+        # 折线图
         with ui.card().classes('w-full h-full'):
-            data = {
+            appears_data = {
                 "刘":appears.appears("玄德"),
                 "关":appears.appears("关公"),
                 "张":appears.appears("张飞"),
@@ -247,12 +258,40 @@ with ui.tab_panels(tabs, value=wordcloud).classes('w-full h-full'):
             }
 
             fig = go.Figure()
-            for i in data.items():
+            for i in appears_data.items():
                 fig.add_trace(go.Scatter(x=[i for i in range(1, 121)], y=i[1], name=i[0], line=dict(shape='spline')))
 
             fig.update_layout(margin=dict(l=0, r=0, t=0, b=0))
             # 创建 Plotly 元素并显示
             ui.plotly(fig).classes("w-full h-full")
+
+        # 数据来源
+        with ui.card().style(f'background-color: {CARD_COLOR}').style('background-color: #e7c593').classes(
+                'w-full').style("padding: 0px"):
+            with ui.expansion("数据来源").classes('w-full'):
+                # 数据为之前折线图的 data
+                # 条形图
+                with ui.card().classes('w-full').style("background-color: #ffffff"):
+                    appears_data_echart_label = ui.label("显示区间：")
+                    # 显示区间
+                    appears_data_echart_slider_min = ui.slider(min=1, max=120, step=1,
+                                                               value=1,
+                                                               on_change=appears_data_echart_update,
+                                                               ).classes("w-full")
+                    appears_data_echart_slider_max = ui.slider(min=1, max=120, step=1,
+                                                               value=30,
+                                                               on_change=appears_data_echart_update,
+                                                               ).classes("w-full")
+                    appears_data_echart = ui.echart({
+                        'xAxis': {'type': 'value'},
+                        'yAxis': {'type': 'category', 'data': list(range(1, 31)), 'inverse': True},
+                        'legend': {'textStyle': {'color': 'gray'}},
+                        'series': [
+                            {'type': 'bar', 'name': person_data[0], 'data': person_data[1][:31]} for person_data in appears_data.items()
+                        ],
+                    }).classes("w-full").style("height: 500px")
+                    # print([{'type': 'bar', 'name': person_data[0], 'data': person_data[1][:30]}['data'] for person_data in appears_data.items()])
+
 
         ui.label("源代码").style("font-size: 50px;")
         with open("modules/appears.py", "r", encoding="utf-8") as f:

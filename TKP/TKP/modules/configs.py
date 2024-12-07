@@ -3,4 +3,4 @@ BOOK_PATH = "../docs/《三国演义》.txt"
 NAMES_PATH = "../docs/names.csv"
 OUTPUT_MENU = "../outputs/"
 
-GD_MAP_API_KEY = "1e143d8b454c9524b6ccc2b85816e2db"
+GD_MAP_API_KEY = "" # 请填写自己的高德地图 api （历史api已失效，请自行创建）
